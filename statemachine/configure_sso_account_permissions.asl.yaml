@@ -1,0 +1,14 @@
+Comment: Configures the SSO permissions of an account.
+StartAt: Configure SSO Account Permissions
+States:
+  Configure SSO Account Permissions:
+    Type: Task
+    Resource: '${ConfigureSSOAccountPermissionsFunctionArn}'
+    ResultPath: $.Result
+    Retry:
+      - ErrorEquals:
+          - States.TaskFailed
+        IntervalSeconds: 2
+        MaxAttempts: 5
+        BackoffRate: 2
+    End: true

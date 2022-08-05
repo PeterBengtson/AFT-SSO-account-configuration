@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Runtime: python3.8
+    Handler: app.lambda_handler
+    Timeout: 900
+
+Description:
+  This configures the SSO permissions of an account. Responds to an SNS message sent 
+  from an AFT customisation to assign SSO permission sets to an account using custom 
+  AFT data.
+
+
+Parameters:
+  OrgId:
+    Type: String
+    Description: The organisation ID of the AWS Organization
+    Default: "o-xxxxxxxxxx"
+
+  CloudAdministrationGroupName:
+    Type: String
+    Description: The name of the SSO Cloud Administration Group to be given 
+      AWSAdministratorAccess to all accounts. Leave blank if you don't want
+      or have a cloud administration group which needs access to all accounts.
+    Default: 'sunstone-cloud-administration'
+
+
+# ------------------------------------------------------------------------------
+
+Resources:
+
+  ###############################################################################
+  #
+  # The SNS queue to which AFT sends messages from the AFT mgmt account.
+  #
+  ###############################################################################
+
+  AFTSSOAccountConfigurationTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      TopicName: aft-sso-account-configuration-topic
+
+  AFTSSOAccountConfigurationTopicPolicy:
+    Type: 'AWS::SNS::TopicPolicy'
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - 
+            Sid: AFTCrossAccountAccess
+            Effect: Allow
+            Principal: "*"
+            Resource: !Ref AFTSSOAccountConfigurationTopic
+            Action: 'sns:Publish'
+            Condition: 
+              "StringEquals": 
+                "aws:PrincipalOrgID": !Ref OrgId
+              # "ArnLike":
+              #   "aws:PrincipalArn": "arn:aws:sts::*:assumed-role/AWSAFTExecution/AWSAFT-Session"
+          - 
+            Sid: AllowUse
+            Effect: Allow
+            Principal: '*'
+            Resource: !Ref AFTSSOAccountConfigurationTopic
+            Action:
+              - sns:Subscribe
+              - sns:Receive
+              - sns:ListSubscriptionsByTopic
+      Topics:
+        - !Ref AFTSSOAccountConfigurationTopic
+
+
+  ###############################################################################
+  #
+  # The trigger function, listening for SNS messages and starting a Step Function
+  # execution for each SNS message received.
+  #
+  ###############################################################################
+
+  TriggerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/trigger/
+      Events:
+        CalledFromAFTEvent:
+          Type: SNS
+          Properties:
+            Topic: !Ref AFTSSOAccountConfigurationTopic
+            Region: !Sub '${AWS::Region}'
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref ConfigureSSOAccountPermissionsSM
+      Policies:
+        - Statement:
+            - 
+              Effect: Allow
+              Action:
+                - states:StartExecution
+              Resource:
+                - !Ref ConfigureSSOAccountPermissionsSM
+
+  LambdaResourcePolicy:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TriggerFunction
+      Principal: sns.amazonaws.com
+      Action: lambda:InvokeFunction
+      SourceArn: !Ref AFTSSOAccountConfigurationTopic
+
+  SubscribeLambdaToSns:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !GetAtt TriggerFunction.Arn
+      Protocol: lambda
+      TopicArn: !Ref AFTSSOAccountConfigurationTopic
+      Region: !Sub '${AWS::Region}'
+
+
+  ###############################################################################
+  #
+  # The Step Functions state machine which performs the actual SSO permission
+  # set changes to the account.
+  #
+  ###############################################################################
+
+  ConfigureSSOAccountPermissionsSM:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/configure_sso_account_permissions.asl.yaml
+      DefinitionSubstitutions:
+        ConfigureSSOAccountPermissionsFunctionArn: !GetAtt ConfigureSSOAccountPermissionsFunction.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ConfigureSSOAccountPermissionsFunction
+
+  ConfigureSSOAccountPermissionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/configure_sso_account_permissions/
+      Policies:
+        - Statement:
+            - 
+              Sid: SSOPermissions
+              Effect: Allow
+              Action:
+                - sso:CreateAccountAssignment
+                - sso:DeleteAccountAssignment
+                - sso:DescribePermissionSet
+                - sso:ListAccountAssignments    
+                - sso:ListInstances
+                - sso:ListPermissionSets
+                - sso:ListPermissionSetsProvisionedToAccount
+              Resource: '*'
+            - 
+              Sid: IdentityStorePermissions
+              Effect: Allow
+              Action:
+                - identitystore:DescribeGroup
+                - identitystore:DescribeUser
+                - identitystore:ListGroups
+                - identitystore:ListUsers
+              Resource: '*'
+      Environment:
+        Variables:
+          CLOUD_ADMINISTRATION_GROUP_NAME: !Ref CloudAdministrationGroupName
+
+
+  ################################################################################
+  #
+  # Monitoring. For state machines, only the state machine itself should be
+  # monitored as it orchestrates the lambda functions which are expected to fail
+  # in certain circumstances without this constituting a processing failure.
+  #
+  # Lambdas not in state machines should be monitored individually.
+  #
+  ################################################################################
+
+  ConfigureSSOAccountPermissionsSMAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: INFRA-ConfigureSSOAccountPermissionsSM-Failure-MEDIUM
+      AlarmDescription: The state machine ConfigureSSOAccountPermissionsSM failed.
+      ActionsEnabled: true
+      OKActions: []
+      AlarmActions: []
+      InsufficientDataActions: []
+      MetricName: ExecutionsFailed
+      Namespace: AWS/States
+      Statistic: Sum
+      Dimensions:
+        - Name: StateMachineArn
+          Value: !Ref ConfigureSSOAccountPermissionsSM
+      Period: 60
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+  AlarmTriggerFunction:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: INFRA-SSOAccountConfigurationTriggerFunction-HIGH
+      ActionsEnabled: true
+      OKActions: []
+      AlarmActions: []
+      InsufficientDataActions: []
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref TriggerFunction
+      Period: 60
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
