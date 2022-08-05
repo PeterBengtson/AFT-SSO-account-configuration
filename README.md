@@ -37,7 +37,13 @@ the groups `AWSSecurityAuditors`, `AWSControlTowerAdmins` and `AWSSecurityAuditP
 They are assigned by Service Catalog when Control Tower creates an account and should be 
 left as is.
 
-Deploy in the organisation account, in the main region.
+Deploy this SAM project in the organisation account, in the main region. All that's required
+is
+```
+sam build
+sam deploy --guided
+```
+Subsequent deploys are done just by `sam build && sam deploy`.
 
 To activate, put the following in your `aft-global-customizations` repo, in `pre-api-helpers.sh`
 in the `api_helpers` directory. Substitute the `--topic-arn` value for the SNS topic.
