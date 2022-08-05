@@ -37,6 +37,9 @@ the groups `AWSSecurityAuditors`, `AWSControlTowerAdmins` and `AWSSecurityAuditP
 They are assigned by Service Catalog when Control Tower creates an account and should be 
 left as is.
 
+
+## Installation
+
 Deploy this SAM project in the organisation account, in the main region. All that's required
 is
 ```
