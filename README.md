@@ -40,7 +40,7 @@ left as is.
 
 ## Installation
 
-Deploy this SAM project in the organisation account, in the main region. All that's required
+Deploy this SAM project in the organisation account, in your main region. All that's required
 is
 ```
 sam build
