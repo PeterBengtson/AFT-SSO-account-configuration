@@ -24,7 +24,7 @@ Parameters:
     Description: The name of the SSO Cloud Administration Group to be given 
       AWSAdministratorAccess to all accounts. Leave blank if you don't want
       or have a cloud administration group which needs access to all accounts.
-    Default: 'sunstone-cloud-administration'
+    Default: 'your-cloud-administration-sso-group-name'
 
 
 # ------------------------------------------------------------------------------
