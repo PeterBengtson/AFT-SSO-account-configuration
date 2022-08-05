@@ -32,9 +32,10 @@ module "john-doe-account" {
 Furthermore, if you provide a value for the parameter `CloudAdministrationGroupName`, this
 SSO group will be automatically added with `AWSAdministratorAccess` to all accounts.
 
-The groups `AWSSecurityAuditors`, `AWSControlTowerAdmins` and `AWSSecurityAuditPowerUsers`
-will not be touched. They are assigned by Service Catalog when Control Tower creates an
-account and should not be altered.
+NB: Any group or user assignments not mentioned will be deleted automatically, except for
+the groups `AWSSecurityAuditors`, `AWSControlTowerAdmins` and `AWSSecurityAuditPowerUsers`. 
+They are assigned by Service Catalog when Control Tower creates an account and should be 
+left as is.
 
 Deploy in the organisation account, in the main region.
 
