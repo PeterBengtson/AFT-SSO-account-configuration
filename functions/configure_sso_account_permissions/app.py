@@ -1,5 +1,4 @@
 import os
-from botocore.exceptions import ClientError
 import boto3
 
 sso = boto3.client('sso-admin')
@@ -144,17 +143,14 @@ def assign_group(account_id, sso_group_name, permission_set_name, sso_instance_p
         raise RuntimeError(f"Can't find a permission set named {permission_set_name}")
     group_id = get_group_id(sso_group_name)
 
-    try:
-        response = sso.create_account_assignment(
-            InstanceArn=SSO_INSTANCE_ARN,
-            TargetType='AWS_ACCOUNT',
-            TargetId=account_id,
-            PrincipalType='GROUP',
-            PrincipalId=group_id,
-            PermissionSetArn=permission_set_arn
-        )
-    except ClientError as e:
-        raise e
+    sso.create_account_assignment(
+        InstanceArn=SSO_INSTANCE_ARN,
+        TargetType='AWS_ACCOUNT',
+        TargetId=account_id,
+        PrincipalType='GROUP',
+        PrincipalId=group_id,
+        PermissionSetArn=permission_set_arn
+    )
 
 
 def unassign_group(account_id, sso_group_name, permission_set_name, sso_instance_permission_sets):
@@ -165,17 +161,14 @@ def unassign_group(account_id, sso_group_name, permission_set_name, sso_instance
         raise RuntimeError(f"Can't find a permission set named {permission_set_name}")
     group_id = get_group_id(sso_group_name)
 
-    try:
-        response = sso.delete_account_assignment(
-            InstanceArn=SSO_INSTANCE_ARN,
-            TargetType='AWS_ACCOUNT',
-            TargetId=account_id,
-            PrincipalType='GROUP',
-            PrincipalId=group_id,
-            PermissionSetArn=permission_set_arn
-        )
-    except ClientError as e:
-        raise e
+    sso.delete_account_assignment(
+        InstanceArn=SSO_INSTANCE_ARN,
+        TargetType='AWS_ACCOUNT',
+        TargetId=account_id,
+        PrincipalType='GROUP',
+        PrincipalId=group_id,
+        PermissionSetArn=permission_set_arn
+    )
 
 
 def assign_user(account_id, sso_user_name, permission_set_name, sso_instance_permission_sets):
@@ -186,17 +179,14 @@ def assign_user(account_id, sso_user_name, permission_set_name, sso_instance_per
         raise RuntimeError(f"Can't find a permission set named {permission_set_name}")
     user_id = get_user_id(sso_user_name)
 
-    try:
-        response = sso.create_account_assignment(
-            InstanceArn=SSO_INSTANCE_ARN,
-            TargetType='AWS_ACCOUNT',
-            TargetId=account_id,
-            PrincipalType='USER',
-            PrincipalId=user_id,
-            PermissionSetArn=permission_set_arn
-        )
-    except ClientError as e:
-        raise e
+    sso.create_account_assignment(
+        InstanceArn=SSO_INSTANCE_ARN,
+        TargetType='AWS_ACCOUNT',
+        TargetId=account_id,
+        PrincipalType='USER',
+        PrincipalId=user_id,
+        PermissionSetArn=permission_set_arn
+    )
 
 
 def unassign_user(account_id, sso_user_name, permission_set_name, sso_instance_permission_sets):
@@ -207,17 +197,14 @@ def unassign_user(account_id, sso_user_name, permission_set_name, sso_instance_p
         raise RuntimeError(f"Can't find a permission set named {permission_set_name}")
     user_id = get_user_id(sso_user_name)
 
-    try:
-        response = sso.delete_account_assignment(
-            InstanceArn=SSO_INSTANCE_ARN,
-            TargetType='AWS_ACCOUNT',
-            TargetId=account_id,
-            PrincipalType='USER',
-            PrincipalId=user_id,
-            PermissionSetArn=permission_set_arn
-        )
-    except ClientError as e:
-        raise e
+    sso.delete_account_assignment(
+        InstanceArn=SSO_INSTANCE_ARN,
+        TargetType='AWS_ACCOUNT',
+        TargetId=account_id,
+        PrincipalType='USER',
+        PrincipalId=user_id,
+        PermissionSetArn=permission_set_arn
+    )
 
 
 def get_group_id(name):
