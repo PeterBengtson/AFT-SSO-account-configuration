@@ -7,12 +7,12 @@ SSO User access to an account in the following way:
 module "john-doe-account" {
   source = "./modules/aft-account-request"
   control_tower_parameters = {
-    AccountEmail = "accounts@example.com"
-    AccountName  = "JohnDoeAccount"                                
+    AccountEmail              = "accounts@example.com"
+    AccountName               = "JohnDoeAccount"                                
     ManagedOrganizationalUnit = "SANDBOX"  
-    SSOUserEmail     = "accounts@example.com"
-    SSOUserFirstName = "Admin"
-    SSOUserLastName  = "User"
+    SSOUserEmail              = "accounts@example.com"
+    SSOUserFirstName          = "Admin"
+    SSOUserLastName           = "User"
   }
 
   custom_fields = {
