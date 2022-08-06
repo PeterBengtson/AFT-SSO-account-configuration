@@ -9,7 +9,7 @@ module "john-doe-account" {
   control_tower_parameters = {
     AccountEmail              = "accounts@example.com"
     AccountName               = "JohnDoeAccount"                                
-    ManagedOrganizationalUnit = "SANDBOX"  
+    ManagedOrganizationalUnit = "Sandbox"  
     SSOUserEmail              = "accounts@example.com"
     SSOUserFirstName          = "Admin"
     SSOUserLastName           = "User"
