@@ -27,7 +27,7 @@ def lambda_handler(data, _context):
     # Maps from permission set name to ARN (for all SSO permissions sets available)
     sso_instance_permission_sets = get_sso_instance_permission_sets()
 
-    # Maps from permission set ARN (for all permission sets deployed to account)
+    # Maps from permission set ARN to name (for all permission sets deployed to account)
     account_permission_sets = get_account_permission_sets(account_id)
 
     # The permission sets assigned to the account, divided into sso_groups and sso_users (just like the input)
