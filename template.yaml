@@ -152,6 +152,7 @@ Resources:
               Action:
                 - sso:CreateAccountAssignment
                 - sso:DeleteAccountAssignment
+                - sso:DescribeAccountAssignmentCreationStatus
                 - sso:DescribePermissionSet
                 - sso:ListAccountAssignments    
                 - sso:ListInstances

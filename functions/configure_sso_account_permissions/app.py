@@ -1,4 +1,5 @@
 import os
+import time
 import boto3
 
 sso = boto3.client('sso-admin')
@@ -10,8 +11,8 @@ if len(instances) != 1:
 
 SSO_INSTANCE_ARN = instances[0]['InstanceArn']
 SSO_IDENTITY_STORE_ID = instances[0]['IdentityStoreId']
-CLOUD_ADMINISTRATION_GROUP_NAME =  os.environ['CLOUD_ADMINISTRATION_GROUP_NAME']
-CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS =  os.environ['CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS']
+CLOUD_ADMINISTRATION_GROUP_NAME = os.environ['CLOUD_ADMINISTRATION_GROUP_NAME']
+CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS = os.environ['CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS']
 
 KEEPERS = ["AWSSecurityAuditors", "AWSControlTowerAdmins", "AWSSecurityAuditPowerUsers"]
 if CLOUD_ADMINISTRATION_GROUP_NAME:
@@ -36,7 +37,7 @@ def lambda_handler(data, _context):
 
     if CLOUD_ADMINISTRATION_GROUP_NAME:
         for permission_set_name in CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS.split(','):
-            assign_group(account_id, CLOUD_ADMINISTRATION_GROUP_NAME, permission_set_name, sso_instance_permission_sets)
+            assign_group(account_id, CLOUD_ADMINISTRATION_GROUP_NAME, permission_set_name, sso_instance_permission_sets, wait=True)
 
     # Add specified groups with specified permissions
     for sso_group_name, permission_set_names in sso_groups.items():
@@ -135,7 +136,7 @@ def get_account_assignments(account_id, account_permission_sets):
     }
 
 
-def assign_group(account_id, sso_group_name, permission_set_name, sso_instance_permission_sets):
+def assign_group(account_id, sso_group_name, permission_set_name, sso_instance_permission_sets, wait=False):
     print(f"Assigning SSO Group {sso_group_name} with {permission_set_name} to account {account_id}...")
 
     permission_set_arn = sso_instance_permission_sets.get(permission_set_name)
@@ -143,7 +144,7 @@ def assign_group(account_id, sso_group_name, permission_set_name, sso_instance_p
         raise RuntimeError(f"Can't find a permission set named {permission_set_name}")
     group_id = get_group_id(sso_group_name)
 
-    sso.create_account_assignment(
+    response = sso.create_account_assignment(
         InstanceArn=SSO_INSTANCE_ARN,
         TargetType='AWS_ACCOUNT',
         TargetId=account_id,
@@ -151,6 +152,8 @@ def assign_group(account_id, sso_group_name, permission_set_name, sso_instance_p
         PrincipalId=group_id,
         PermissionSetArn=permission_set_arn
     )
+    if wait:
+        wait_for_completion(response['AccountAssignmentCreationStatus']['RequestId'])
 
 
 def unassign_group(account_id, sso_group_name, permission_set_name, sso_instance_permission_sets):
@@ -251,3 +254,19 @@ def get_user_name(principal_id):
         IdentityStoreId=SSO_IDENTITY_STORE_ID,
         UserId=principal_id
     )['UserName']
+
+
+def wait_for_completion(request_id):
+    print("Waiting for completion...")
+    seconds = 0
+    while True:
+        time.sleep(1)
+        seconds += 1
+        response = sso.describe_account_assignment_creation_status(
+            InstanceArn=SSO_INSTANCE_ARN,
+            AccountAssignmentCreationRequestId=request_id
+        )
+        if response['AccountAssignmentCreationStatus']['Status'] != 'IN_PROGRESS':
+            print(f"Completed in {seconds} seconds.")
+            return response
+
