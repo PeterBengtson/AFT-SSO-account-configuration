@@ -75,3 +75,49 @@ echo "Posting SNS message to configure the account $ACCOUNT_ID for SSO access...
 aws sns publish --topic-arn "arn:aws:sns:xx-xxxx-1:111122223333:aft-sso-account-configuration-topic" \
   --message "{\"account_id\": \"$ACCOUNT_ID\", \"sso_groups\": $SSO_GROUPS, \"sso_users\": $SSO_USERS}"
 ```
+
+
+## Protecting the settings
+
+You will probably want to include something like the following in an SCP to protect the AFT settings 
+from being tampered with:
+```
+{
+  "Sid": "DenyAFTCustomFieldsModification",
+  "Effect": "Deny",
+  "Action": [
+    "ssm:DeleteParameter*",
+    "ssm:PutParameter"
+  ],
+  "Resource": "arn:aws:ssm:*:*:parameter/aft/account-request/custom-fields/*",
+  "Condition": {
+    "ArnNotLike": {
+      "aws:PrincipalArn": [
+        "arn:aws:iam::*:role/AWSControlTowerExecution",
+        "arn:aws:iam::*:role/aws-reserved/sso.amazonaws.com/*/AWSReservedSSO_AWSAdministratorAccess_*",
+        "arn:aws:iam::*:role/stacksets-exec-*",
+        "arn:aws:iam::*:role/AWSAFTService",
+        "arn:aws:iam::*:role/AWSAFTExecution"
+      ]
+    }
+  }
+},
+{
+  "Sid": "DenyAFTCustomFieldsUseAndVisibility",
+  "Effect": "Deny",
+  "Action": [
+    "ssm:DeleteParameter*",
+    "ssm:DescribeParameters",
+    "ssm:GetParameter*",
+    "ssm:PutParameter"
+  ],
+  "Resource": "arn:aws:ssm:*:*:parameter/aft/account-request/custom-fields/*",
+  "Condition": {
+    "ArnLike": {
+      "aws:PrincipalArn": [
+        "arn:aws:iam::*:role/aws-reserved/sso.amazonaws.com/*/AWSReservedSSO_DeveloperAccess_*"
+      ]
+    }
+  }
+}
+```
