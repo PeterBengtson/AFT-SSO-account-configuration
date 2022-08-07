@@ -11,6 +11,7 @@ if len(instances) != 1:
 SSO_INSTANCE_ARN = instances[0]['InstanceArn']
 SSO_IDENTITY_STORE_ID = instances[0]['IdentityStoreId']
 CLOUD_ADMINISTRATION_GROUP_NAME =  os.environ['CLOUD_ADMINISTRATION_GROUP_NAME']
+CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS =  os.environ['CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS']
 
 KEEPERS = ["AWSSecurityAuditors", "AWSControlTowerAdmins", "AWSSecurityAuditPowerUsers"]
 if CLOUD_ADMINISTRATION_GROUP_NAME:
@@ -34,8 +35,8 @@ def lambda_handler(data, _context):
     account_assignments = get_account_assignments(account_id, account_permission_sets)
 
     if CLOUD_ADMINISTRATION_GROUP_NAME:
-        # Add the group to the account with AWSAdministratorAccess
-        assign_group(account_id, CLOUD_ADMINISTRATION_GROUP_NAME, 'AWSAdministratorAccess', sso_instance_permission_sets)
+        for permission_set_name in CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS.split(','):
+            assign_group(account_id, CLOUD_ADMINISTRATION_GROUP_NAME, permission_set_name, sso_instance_permission_sets)
 
     # Add specified groups with specified permissions
     for sso_group_name, permission_set_names in sso_groups.items():

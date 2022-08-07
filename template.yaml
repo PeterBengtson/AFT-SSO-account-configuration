@@ -26,6 +26,11 @@ Parameters:
       or have a cloud administration group which needs access to all accounts.
     Default: 'your-cloud-administration-sso-group-name'
 
+  CloudAdministrationGroupPermissionSets:
+    Type: String
+    Description: The permission sets to be assigned the CloudAdministrationGroupName group.
+    Default: 'AWSAdministratorAccess,AWSReadOnlyAccess'
+    
 
 # ------------------------------------------------------------------------------
 
@@ -165,6 +170,7 @@ Resources:
       Environment:
         Variables:
           CLOUD_ADMINISTRATION_GROUP_NAME: !Ref CloudAdministrationGroupName
+          CLOUD_ADMINISTRATION_GROUP_PERMISSION_SETS: !Ref CloudAdministrationGroupPermissionSets
 
 
   ################################################################################
