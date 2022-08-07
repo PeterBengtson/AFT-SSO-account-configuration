@@ -9,7 +9,7 @@ STATE_MACHINE_ARN = os.environ['STATE_MACHINE_ARN']
 
 
 def lambda_handler(event, _context):
-    print(event)
+    #print(event)
 
     message_raw = event['Records'][0]['Sns']['Message']
     message = json.loads(message_raw)
@@ -23,6 +23,8 @@ def lambda_handler(event, _context):
 
     random_number = randint(100000, 999999)
     name = f'configure-{account_id}-sso-permissions-job-{random_number}'
+
+    print(f"Starting job {name} with input {message}")
 
     step_function_client.start_execution(
         stateMachineArn=STATE_MACHINE_ARN,
