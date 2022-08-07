@@ -34,7 +34,7 @@ SSO group will be automatically added to all accounts, with the permissions give
 parameter `CloudAdministrationGroupPermissionSets`, defaulting to 
 `"AWSAdministratorAccess,AWSReadOnlyAccess"`.
 
-NB: Any group or user assignments not mentioned will be deleted automatically, except for
+NB: Any group or user assignments not explicitly mentioned will be deleted automatically, except for
 the groups `AWSSecurityAuditors`, `AWSControlTowerAdmins` and `AWSSecurityAuditPowerUsers`. 
 They are assigned by Service Catalog when Control Tower creates an account and should be 
 left as is.
