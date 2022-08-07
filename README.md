@@ -30,7 +30,9 @@ module "john-doe-account" {
 ```
 
 Furthermore, if you provide a value for the parameter `CloudAdministrationGroupName`, this
-SSO group will be automatically added with `AWSAdministratorAccess` to all accounts.
+SSO group will be automatically added to all accounts, with the permissions given in the
+parameter `CloudAdministrationGroupPermissionSets`, defaulting to 
+`AWSAdministratorAccess,AWSReadOnlyAccess`.
 
 NB: Any group or user assignments not mentioned will be deleted automatically, except for
 the groups `AWSSecurityAuditors`, `AWSControlTowerAdmins` and `AWSSecurityAuditPowerUsers`. 
