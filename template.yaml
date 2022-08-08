@@ -62,8 +62,8 @@ Resources:
             Condition: 
               "StringEquals": 
                 "aws:PrincipalOrgID": !Ref OrgId
-              # "ArnLike":
-              #   "aws:PrincipalArn": "arn:aws:sts::*:assumed-role/AWSAFTExecution/AWSAFT-Session"
+              "ArnLike":
+                "aws:PrincipalArn": "arn:aws:iam::*:role/AWSAFTExecution"
           - 
             Sid: AllowUse
             Effect: Allow
