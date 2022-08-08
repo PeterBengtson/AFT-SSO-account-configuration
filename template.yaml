@@ -38,7 +38,7 @@ Resources:
 
   ###############################################################################
   #
-  # The SNS queue to which AFT sends messages from the AFT mgmt account.
+  # The SNS queue to which AFT sends messages from each member account.
   #
   ###############################################################################
 
