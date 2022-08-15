@@ -44,7 +44,7 @@ left as is.
 
 Deploy this SAM project in the organisation account, in your main region. All that's required
 is
-```
+```console
 sam build
 sam deploy --guided
 ```
