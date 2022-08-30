@@ -3,7 +3,7 @@
 Allows you to use AFT (Account Factory for Terraform) to declaratively specify SSO Group and
 SSO User access to an account in the following way:
 
-```
+```terraform
 module "john-doe-account" {
   source = "./modules/aft-account-request"
   control_tower_parameters = {
@@ -44,7 +44,7 @@ left as is.
 
 Deploy this SAM project in the organisation account, in your main region. All that's required
 is
-```
+```console
 sam build
 sam deploy --guided
 ```
@@ -53,7 +53,7 @@ Subsequent deploys are done just by `sam build && sam deploy`.
 To activate, put the following in your `aft-global-customizations` repo, in `pre-api-helpers.sh`
 in the `api_helpers` directory. Substitute the `--topic-arn` value for the SNS topic.
 
-```
+```bash
 #!/bin/bash -e
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
@@ -81,7 +81,7 @@ aws sns publish --topic-arn "arn:aws:sns:xx-xxxx-1:111122223333:aft-sso-account-
 
 You will probably want to include something like the following in an SCP to protect the AFT settings 
 from being tampered with:
-```
+```json
 {
   "Sid": "DenyAFTCustomFieldsModification",
   "Effect": "Deny",
@@ -107,7 +107,7 @@ from being tampered with:
 You can add the following to the same SCP to block users of a permission set from using or 
 even seeing the values of the SSO parameters in their own accounts. Substitute `DeveloperAccess`
 with the name of your own permission set, but keep the prefix and wildcard characters:
-```
+```json
 {
   "Sid": "DenyAFTCustomFieldsUseAndVisibility",
   "Effect": "Deny",
