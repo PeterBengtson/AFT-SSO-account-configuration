@@ -77,27 +77,46 @@ def normalize(dict):
 
 
 def get_sso_instance_permission_sets():
-    result = {}
-    pm_set_arns = sso.list_permission_sets(
+    response = sso.list_permission_sets(
         InstanceArn=SSO_INSTANCE_ARN
-    )['PermissionSets']
+    )
+    pm_set_arns = response['PermissionSets']
+    while response.get('NextToken'):
+        response = sso.list_permission_sets(
+            InstanceArn=SSO_INSTANCE_ARN,
+            NextToken=response['NextToken']
+        )
+        pm_set_arns.extend(response['PermissionSets'])
+
+
+    result = {}
     for pm_set_arn in pm_set_arns:
         response = sso.describe_permission_set(
             InstanceArn=SSO_INSTANCE_ARN,
             PermissionSetArn=pm_set_arn
         )['PermissionSet']
         name = response['Name']
+        print(name)
         # Map name to ARN
         result[name] = pm_set_arn
     return result
 
 
 def get_account_permission_sets(account_id):
-    result = {}
-    pm_set_arns = sso.list_permission_sets_provisioned_to_account(
+    response = sso.list_permission_sets_provisioned_to_account(
         InstanceArn=SSO_INSTANCE_ARN,
         AccountId=account_id
-    )['PermissionSets']
+    )
+    pm_set_arns = response['PermissionSets']
+    while response.get('NextToken'):
+        response = sso.list_permission_sets_provisioned_to_account(
+            InstanceArn=SSO_INSTANCE_ARN,
+            AccountId=account_id,
+            NextToken=response['NextToken']
+        )
+        pm_set_arns.extend(response['PermissionSets'])
+
+    result = {}
     for pm_set_arn in pm_set_arns:
         response = sso.describe_permission_set(
             InstanceArn=SSO_INSTANCE_ARN,
@@ -106,6 +125,7 @@ def get_account_permission_sets(account_id):
         name = response['Name']
         # Map from ARN to name
         result[pm_set_arn] = name
+
     return result
 
 
