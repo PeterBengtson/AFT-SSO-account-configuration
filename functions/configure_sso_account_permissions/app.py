@@ -107,7 +107,7 @@ def get_account_permission_sets(account_id):
         InstanceArn=SSO_INSTANCE_ARN,
         AccountId=account_id
     )
-    pm_set_arns = response['PermissionSets']
+    pm_set_arns = response.get('PermissionSets', [])
     while response.get('NextToken'):
         response = sso.list_permission_sets_provisioned_to_account(
             InstanceArn=SSO_INSTANCE_ARN,
