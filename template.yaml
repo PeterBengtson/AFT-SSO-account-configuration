@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    Runtime: python3.9
+    Runtime: python3.12
     Handler: app.lambda_handler
     Timeout: 900
 
