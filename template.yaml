@@ -210,6 +210,7 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: INFRA-SSOAccountConfigurationTriggerFunction-HIGH
+      AlarmDescription: SSOAccountConfigurationTriggerFunction failed.
       ActionsEnabled: true
       OKActions: []
       AlarmActions: []
