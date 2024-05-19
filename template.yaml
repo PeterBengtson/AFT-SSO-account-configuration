@@ -114,13 +114,13 @@ Resources:
       Action: lambda:InvokeFunction
       SourceArn: !Ref AFTSSOAccountConfigurationTopic
 
-  SubscribeLambdaToSns:
-    Type: AWS::SNS::Subscription
-    Properties:
-      Endpoint: !GetAtt TriggerFunction.Arn
-      Protocol: lambda
-      TopicArn: !Ref AFTSSOAccountConfigurationTopic
-      Region: !Sub '${AWS::Region}'
+  # SubscribeLambdaToSns:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     Endpoint: !GetAtt TriggerFunction.Arn
+  #     Protocol: lambda
+  #     TopicArn: !Ref AFTSSOAccountConfigurationTopic
+  #     Region: !Sub '${AWS::Region}'
 
 
   ###############################################################################
