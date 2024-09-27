@@ -14,11 +14,6 @@ Description:
 
 
 Parameters:
-  OrgId:
-    Type: String
-    Description: The organisation ID of the AWS Organization
-    Default: "o-xxxxxxxxxx"
-
   CloudAdministrationGroupName:
     Type: String
     Description: The name of the SSO Cloud Administration Group to be given 
