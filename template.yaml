@@ -54,12 +54,17 @@ Resources:
         Version: '2012-10-17'
         Statement:
           - 
-            Sid: AFTManagementAccountAccess
+            Sid: CrossAccountAccess
             Effect: Allow
             Principal: 
-              AWS: !Sub 'arn:aws:iam::${AFTManagementAccountId}:role/AWSAFTExecution'
+              AWS: '*'
             Resource: !Ref AFTSSOAccountConfigurationTopic
             Action: 'sns:Publish'
+            Condition: 
+              # "StringEquals": 
+              #   "aws:PrincipalOrgID": !Ref OrgId
+              "ArnLike":
+                "aws:PrincipalArn": "arn:aws:iam::*:role/AWSAFTExecution"
           - 
             Sid: AllowUse
             Effect: Allow
