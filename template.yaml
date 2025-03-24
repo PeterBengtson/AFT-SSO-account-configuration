@@ -61,8 +61,6 @@ Resources:
             Resource: !Ref AFTSSOAccountConfigurationTopic
             Action: 'sns:Publish'
             Condition: 
-              # "StringEquals": 
-              #   "aws:PrincipalOrgID": !Ref OrgId
               "ArnLike":
                 "aws:PrincipalArn": "arn:aws:iam::*:role/AWSAFTExecution"
           - 
@@ -78,8 +76,10 @@ Resources:
           - 
             Sid: AllowAWSChatbot
             Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/management.chatbot.amazonaws.com/AWSServiceRoleForAWSChatbot'
+            Principal: '*'
+            Condition:
+              StringLike:
+                "aws:PrincipalArn": "arn:aws:iam::*:role/aws-service-role/management.chatbot.amazonaws.com/AWSServiceRoleForAWSChatbot"
             Resource: !Ref AFTSSOAccountConfigurationTopic
             Action:
               - sns:Subscribe
